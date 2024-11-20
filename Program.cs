@@ -37,8 +37,8 @@ class Program
         Console.Write("Enter the number of minutes: ");
         int minutes = int.Parse(Console.ReadLine());
 
-        int hours = minutes / 60; // Calculate hours
-        int remainingMinutes = minutes % 60; // Calculate remaining minutes
+        int hours = minutes / 60; 
+        int remainingMinutes = minutes % 60; 
 
         Console.WriteLine($"Time: {hours}:{remainingMinutes:D2}");
     }
@@ -100,7 +100,7 @@ class Program
     static void GuessTheNumber()
     {
         Random random = new Random();
-        int secretNumber = random.Next(1, 101); // Random number between 1 and 100
+        int secretNumber = random.Next(1, 101);
         int guess;
         Console.WriteLine("Guess the number between 1 and 100!");
 
