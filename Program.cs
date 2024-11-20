@@ -1,168 +1,126 @@
 using System;
-using System.Collections.Generic;
 
 class Program
 {
     static void Main()
     {
-        Console.WriteLine("Choose a program:");
-        Console.WriteLine("1. Check if a number is prime");
-        Console.WriteLine("2. Find divisors of a number between 2 and 10");
-        Console.WriteLine("3. Calculate the power of a number");
-        Console.WriteLine("4. Calculate the sum of multiple values");
-        Console.WriteLine("5. Check if a number is an Armstrong number");
-        Console.WriteLine("6. Find the number of proper divisors of a number");
-        Console.Write("Enter the program number: ");
-
+        Console.WriteLine("Choose a task to run (1, 2, 3, or 4):");
+        Console.WriteLine("1 - Time Calculator");
+        Console.WriteLine("2 - Age Category");
+        Console.WriteLine("3 - Average Score");
+        Console.WriteLine("4 - Guess the Number Game");
+        Console.Write("Enter your choice: ");
         string choice = Console.ReadLine();
 
-        if (choice == "1")
+        switch (choice)
         {
-            Console.Write("Enter a number: ");
-            if (int.TryParse(Console.ReadLine(), out int number))
-            {
-                if (IsPrime(number))
-                    Console.WriteLine("Prime");
-                else
-                    Console.WriteLine("Not Prime");
-            }
-            else
-            {
-                Console.WriteLine("Invalid input.");
-            }
+            case "1":
+                TimeCalculator();
+                break;
+            case "2":
+                AgeCategory();
+                break;
+            case "3":
+                AverageScore();
+                break;
+            case "4":
+                GuessTheNumber();
+                break;
+            default:
+                Console.WriteLine("Invalid choice. Please run the program again.");
+                break;
         }
-        else if (choice == "2")
-        {
-            Console.Write("Enter a number: ");
-            if (int.TryParse(Console.ReadLine(), out int number))
-            {
-                List<int> divisors = FindDivisors(number);
-                Console.WriteLine("Divisors: " + string.Join(", ", divisors));
-            }
-            else
-            {
-                Console.WriteLine("Invalid input.");
-            }
-        }
-        else if (choice == "3")
-        {
-            Console.Write("Enter a number: ");
-            if (int.TryParse(Console.ReadLine(), out int baseNumber))
-            {
-                Console.Write("Enter the power: ");
-                if (int.TryParse(Console.ReadLine(), out int power) && power >= 0)
-                {
-                    Console.WriteLine($"Result: {Math.Pow(baseNumber, power)}");
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input for power.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Invalid input.");
-            }
-        }
-        else if (choice == "4")
-        {
-            Console.Write("Enter numbers separated by spaces: ");
-            string input = Console.ReadLine();
-            string[] numbers = input.Split(' ');
-            int sum = 0;
+    }
 
-            foreach (var num in numbers)
-            {
-                if (int.TryParse(num, out int value))
-                {
-                    sum += value;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input in the list.");
-                    return;
-                }
-            }
+    static void TimeCalculator()
+    {
+        Console.Write("Enter the number of minutes: ");
+        int minutes = int.Parse(Console.ReadLine());
 
-            Console.WriteLine($"Sum: {sum}");
-        }
-        else if (choice == "5")
+        int hours = minutes / 60; // Calculate hours
+        int remainingMinutes = minutes % 60; // Calculate remaining minutes
+
+        Console.WriteLine($"Time: {hours}:{remainingMinutes:D2}");
+    }
+
+    static void AgeCategory()
+    {
+        Console.Write("Enter your age: ");
+        int age = int.Parse(Console.ReadLine());
+
+        string category;
+
+        if (age >= 0 && age <= 12)
         {
-            Console.Write("Enter a number: ");
-            if (int.TryParse(Console.ReadLine(), out int number))
-            {
-                if (IsArmstrong(number))
-                    Console.WriteLine($"{number} is an Armstrong number.");
-                else
-                    Console.WriteLine($"{number} is not an Armstrong number.");
-            }
-            else
-            {
-                Console.WriteLine("Invalid input.");
-            }
+            category = "Child";
         }
-        else if (choice == "6")
+        else if (age >= 13 && age <= 19)
         {
-            Console.Write("Enter a number: ");
-            if (int.TryParse(Console.ReadLine(), out int number))
-            {
-                int properDivisors = CountProperDivisors(number);
-                Console.WriteLine($"Number of proper divisors: {properDivisors}");
-            }
-            else
-            {
-                Console.WriteLine("Invalid input.");
-            }
+            category = "Teenager";
+        }
+        else if (age >= 20 && age <= 59)
+        {
+            category = "Adult";
+        }
+        else if (age >= 60)
+        {
+            category = "Senior";
         }
         else
         {
-            Console.WriteLine("Invalid program choice.");
+            category = "Invalid age.";
         }
+
+        Console.WriteLine($"You are classified as: {category}");
     }
 
-    static bool IsPrime(int num)
+    static void AverageScore()
     {
-        if (num <= 1) return false;
-        for (int i = 2; i <= Math.Sqrt(num); i++)
+        Console.Write("Enter your first subject score (0-100): ");
+        int score1 = int.Parse(Console.ReadLine());
+        Console.Write("Enter your second subject score (0-100): ");
+        int score2 = int.Parse(Console.ReadLine());
+        Console.Write("Enter your third subject score (0-100): ");
+        int score3 = int.Parse(Console.ReadLine());
+
+        double average = (score1 + score2 + score3) / 3.0;
+
+        string result = average switch
         {
-            if (num % i == 0)
-                return false;
-        }
-        return true;
+            >= 80 and <= 100 => "Excellent",
+            >= 60 and < 80 => "Good",
+            >= 40 and < 60 => "Satisfactory",
+            < 40 => "Unsatisfactory",
+            _ => "Invalid input"
+        };
+
+        Console.WriteLine($"Your average score is {average:F2}, which is: {result}");
     }
 
-    static List<int> FindDivisors(int num)
+    static void GuessTheNumber()
     {
-        List<int> divisors = new List<int>();
-        for (int i = 2; i <= 10; i++)
-        {
-            if (num % i == 0)
-                divisors.Add(i);
-        }
-        return divisors;
-    }
+        Random random = new Random();
+        int secretNumber = random.Next(1, 101); // Random number between 1 and 100
+        int guess;
+        Console.WriteLine("Guess the number between 1 and 100!");
 
-    static bool IsArmstrong(int num)
-    {
-        int sum = 0, temp = num;
-        int digits = num.ToString().Length;
-        while (temp > 0)
+        do
         {
-            int digit = temp % 10;
-            sum += (int)Math.Pow(digit, digits);
-            temp /= 10;
-        }
-        return sum == num;
-    }
+            Console.Write("Enter your guess: ");
+            guess = int.Parse(Console.ReadLine());
 
-    static int CountProperDivisors(int num)
-    {
-        int count = 0;
-        for (int i = 1; i <= num / 2; i++)
-        {
-            if (num % i == 0)
-                count++;
-        }
-        return count;
+            if (guess > secretNumber)
+            {
+                Console.WriteLine("Too high! Try again.");
+            }
+            else if (guess < secretNumber)
+            {
+                Console.WriteLine("Too low! Try again.");
+            }
+            else
+            {
+                Console.WriteLine("Congratulations! You guessed the correct number.");
+            }
+        } while (guess != secretNumber);
     }
 }
