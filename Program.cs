@@ -1,126 +1,109 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-class Program
+namespace TaskManager
 {
-    static void Main()
+    class Program
     {
-        Console.WriteLine("Choose a task to run (1, 2, 3, or 4):");
-        Console.WriteLine("1 - Time Calculator");
-        Console.WriteLine("2 - Age Category");
-        Console.WriteLine("3 - Average Score");
-        Console.WriteLine("4 - Guess the Number Game");
-        Console.Write("Enter your choice: ");
-        string choice = Console.ReadLine();
-
-        switch (choice)
+        static void Main(string[] args)
         {
-            case "1":
-                TimeCalculator();
-                break;
-            case "2":
-                AgeCategory();
-                break;
-            case "3":
-                AverageScore();
-                break;
-            case "4":
-                GuessTheNumber();
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Please run the program again.");
-                break;
-        }
-    }
+            Console.WriteLine("Task Manager Application");
+            List<Task> tasks = new List<Task>();
+            bool running = true;
 
-    static void TimeCalculator()
-    {
-        Console.Write("Enter the number of minutes: ");
-        int minutes = int.Parse(Console.ReadLine());
-
-        int hours = minutes / 60; 
-        int remainingMinutes = minutes % 60; 
-
-        Console.WriteLine($"Time: {hours}:{remainingMinutes:D2}");
-    }
-
-    static void AgeCategory()
-    {
-        Console.Write("Enter your age: ");
-        int age = int.Parse(Console.ReadLine());
-
-        string category;
-
-        if (age >= 0 && age <= 12)
-        {
-            category = "Child";
-        }
-        else if (age >= 13 && age <= 19)
-        {
-            category = "Teenager";
-        }
-        else if (age >= 20 && age <= 59)
-        {
-            category = "Adult";
-        }
-        else if (age >= 60)
-        {
-            category = "Senior";
-        }
-        else
-        {
-            category = "Invalid age.";
-        }
-
-        Console.WriteLine($"You are classified as: {category}");
-    }
-
-    static void AverageScore()
-    {
-        Console.Write("Enter your first subject score (0-100): ");
-        int score1 = int.Parse(Console.ReadLine());
-        Console.Write("Enter your second subject score (0-100): ");
-        int score2 = int.Parse(Console.ReadLine());
-        Console.Write("Enter your third subject score (0-100): ");
-        int score3 = int.Parse(Console.ReadLine());
-
-        double average = (score1 + score2 + score3) / 3.0;
-
-        string result = average switch
-        {
-            >= 80 and <= 100 => "Excellent",
-            >= 60 and < 80 => "Good",
-            >= 40 and < 60 => "Satisfactory",
-            < 40 => "Unsatisfactory",
-            _ => "Invalid input"
-        };
-
-        Console.WriteLine($"Your average score is {average:F2}, which is: {result}");
-    }
-
-    static void GuessTheNumber()
-    {
-        Random random = new Random();
-        int secretNumber = random.Next(1, 101);
-        int guess;
-        Console.WriteLine("Guess the number between 1 and 100!");
-
-        do
-        {
-            Console.Write("Enter your guess: ");
-            guess = int.Parse(Console.ReadLine());
-
-            if (guess > secretNumber)
+            while (running)
             {
-                Console.WriteLine("Too high! Try again.");
+                Console.WriteLine("\nChoose an option:");
+                Console.WriteLine("1. Add a Task");
+                Console.WriteLine("2. Remove a Task");
+                Console.WriteLine("3. Mark a Task as Completed");
+                Console.WriteLine("4. Show All Tasks");
+                Console.WriteLine("5. Exit");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write("Enter task description: ");
+                        string description = Console.ReadLine();
+                        tasks.Add(new Task(description));
+                        Console.WriteLine("Task added!");
+                        break;
+
+                    case "2":
+                        Console.Write("Enter task ID to remove: ");
+                        if (int.TryParse(Console.ReadLine(), out int removeId))
+                        {
+                            tasks.RemoveAll(t => t.Id == removeId);
+                            Console.WriteLine("Task removed!");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid ID!");
+                        }
+                        break;
+
+                    case "3":
+                        Console.Write("Enter task ID to mark as completed: ");
+                        if (int.TryParse(Console.ReadLine(), out int completeId))
+                        {
+                            Task task = tasks.FirstOrDefault(t => t.Id == completeId);
+                            if (task != null)
+                            {
+                                task.IsCompleted = true;
+                                Console.WriteLine("Task marked as completed!");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Task not found!");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid ID!");
+                        }
+                        break;
+
+                    case "4":
+                        Console.WriteLine("\nTasks:");
+                        foreach (var t in tasks)
+                        {
+                            Console.WriteLine(t);
+                        }
+                        break;
+
+                    case "5":
+                        running = false;
+                        Console.WriteLine("Exiting...");
+                        break;
+
+                    default:
+                        Console.WriteLine("Invalid choice! Try again.");
+                        break;
+                }
             }
-            else if (guess < secretNumber)
-            {
-                Console.WriteLine("Too low! Try again.");
-            }
-            else
-            {
-                Console.WriteLine("Congratulations! You guessed the correct number.");
-            }
-        } while (guess != secretNumber);
+        }
+    }
+
+    class Task
+    {
+        private static int nextId = 1;
+        public int Id { get; }
+        public string Description { get; set; }
+        public bool IsCompleted { get; set; }
+
+        public Task(string description)
+        {
+            Id = nextId++;
+            Description = description;
+            IsCompleted = false;
+        }
+
+        public override string ToString()
+        {
+            return $"[{Id}] {Description} - {(IsCompleted ? "Completed" : "Not Completed")}";
+        }
     }
 }
