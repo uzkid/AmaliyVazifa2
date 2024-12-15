@@ -1,109 +1,86 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace TaskManager
+public class Book
 {
-    class Program
+    // Private fields
+    private string _author;
+    private decimal _price;
+
+    // Property for book name (readonly, initialized via constructor)
+    public string Name { get; }
+
+    // Properties for author and price
+    public string Author
     {
-        static void Main(string[] args)
+        get { return _author; }
+        set { _author = value; }
+    }
+
+    public decimal Price
+    {
+        get { return _price; }
+        set
         {
-            Console.WriteLine("Task Manager Application");
-            List<Task> tasks = new List<Task>();
-            bool running = true;
-
-            while (running)
+            if (value >= 0) // Ensuring price is non-negative
             {
-                Console.WriteLine("\nChoose an option:");
-                Console.WriteLine("1. Add a Task");
-                Console.WriteLine("2. Remove a Task");
-                Console.WriteLine("3. Mark a Task as Completed");
-                Console.WriteLine("4. Show All Tasks");
-                Console.WriteLine("5. Exit");
-
-                string choice = Console.ReadLine();
-
-                switch (choice)
-                {
-                    case "1":
-                        Console.Write("Enter task description: ");
-                        string description = Console.ReadLine();
-                        tasks.Add(new Task(description));
-                        Console.WriteLine("Task added!");
-                        break;
-
-                    case "2":
-                        Console.Write("Enter task ID to remove: ");
-                        if (int.TryParse(Console.ReadLine(), out int removeId))
-                        {
-                            tasks.RemoveAll(t => t.Id == removeId);
-                            Console.WriteLine("Task removed!");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid ID!");
-                        }
-                        break;
-
-                    case "3":
-                        Console.Write("Enter task ID to mark as completed: ");
-                        if (int.TryParse(Console.ReadLine(), out int completeId))
-                        {
-                            Task task = tasks.FirstOrDefault(t => t.Id == completeId);
-                            if (task != null)
-                            {
-                                task.IsCompleted = true;
-                                Console.WriteLine("Task marked as completed!");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Task not found!");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid ID!");
-                        }
-                        break;
-
-                    case "4":
-                        Console.WriteLine("\nTasks:");
-                        foreach (var t in tasks)
-                        {
-                            Console.WriteLine(t);
-                        }
-                        break;
-
-                    case "5":
-                        running = false;
-                        Console.WriteLine("Exiting...");
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid choice! Try again.");
-                        break;
-                }
+                _price = value;
+            }
+            else
+            {
+                throw new ArgumentException("Price cannot be negative.");
             }
         }
     }
 
-    class Task
+    // Constructor to initialize the book name
+    public Book(string name)
     {
-        private static int nextId = 1;
-        public int Id { get; }
-        public string Description { get; set; }
-        public bool IsCompleted { get; set; }
-
-        public Task(string description)
+        if (string.IsNullOrWhiteSpace(name))
         {
-            Id = nextId++;
-            Description = description;
-            IsCompleted = false;
+            throw new ArgumentException("Book name cannot be empty.");
         }
+        Name = name;
+    }
 
-        public override string ToString()
+    // Additional methods
+    public void DisplayDetails()
+    {
+        Console.WriteLine($"Book Name: {Name}");
+        Console.WriteLine($"Author: {_author}");
+        Console.WriteLine($"Price: {_price:C}");
+    }
+
+    public void ApplyDiscount(decimal percentage)
+    {
+        if (percentage < 0 || percentage > 100)
         {
-            return $"[{Id}] {Description} - {(IsCompleted ? "Completed" : "Not Completed")}";
+            throw new ArgumentException("Discount percentage must be between 0 and 100.");
         }
+        _price -= _price * (percentage / 100);
+        Console.WriteLine($"Discount applied. New Price: {_price:C}");
     }
 }
+
+// Using the Book class
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Creating a Book object
+        Book myBook = new Book("C# Programming");
+
+        // Setting property values
+        myBook.Author = "John Doe";
+        myBook.Price = 29.99m;
+
+        // Displaying book details
+        myBook.DisplayDetails();
+
+        // Applying a discount
+        myBook.ApplyDiscount(10);
+
+        // Displaying updated details
+        myBook.DisplayDetails();
+    }
+}
+
