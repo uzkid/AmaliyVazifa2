@@ -1,86 +1,92 @@
-using System;
+class BankAccount:
+    def __init__(self, account_number, balance=0):
+        self.account_number = account_number
+        self.balance = balance
 
-public class Book
-{
-    // Private fields
-    private string _author;
-    private decimal _price;
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            print(f"{amount} so'm depozit qilindi. Joriy balans: {self.balance} so'm.")
+        else:
+            print("Depozit miqdori noldan katta bo'lishi kerak.")
 
-    // Property for book name (readonly, initialized via constructor)
-    public string Name { get; }
+    def withdraw(self, amount):
+        if 0 < amount <= self.balance:
+            self.balance -= amount
+            print(f"{amount} so'm yechildi. Joriy balans: {self.balance} so'm.")
+        else:
+            print("Pul yechib olish uchun yetarli mablag' mavjud emas yoki miqdor noto'g'ri.")
 
-    // Properties for author and price
-    public string Author
-    {
-        get { return _author; }
-        set { _author = value; }
-    }
+    def get_balance(self):
+        return self.balance
 
-    public decimal Price
-    {
-        get { return _price; }
-        set
-        {
-            if (value >= 0) // Ensuring price is non-negative
-            {
-                _price = value;
-            }
-            else
-            {
-                throw new ArgumentException("Price cannot be negative.");
-            }
-        }
-    }
 
-    // Constructor to initialize the book name
-    public Book(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Book name cannot be empty.");
-        }
-        Name = name;
-    }
+class Customer:
+    def __init__(self, name, account):
+        self.name = name
+        self.account = account
 
-    // Additional methods
-    public void DisplayDetails()
-    {
-        Console.WriteLine($"Book Name: {Name}");
-        Console.WriteLine($"Author: {_author}");
-        Console.WriteLine($"Price: {_price:C}");
-    }
 
-    public void ApplyDiscount(decimal percentage)
-    {
-        if (percentage < 0 || percentage > 100)
-        {
-            throw new ArgumentException("Discount percentage must be between 0 and 100.");
-        }
-        _price -= _price * (percentage / 100);
-        Console.WriteLine($"Discount applied. New Price: {_price:C}");
-    }
-}
+class Bank:
+    def __init__(self):
+        self.customers = []
 
-// Using the Book class
-class Program
-{
-    static void Main(string[] args)
-    {
-        // Creating a Book object
-        Book myBook = new Book("C# Programming");
+    def open_account(self, name, account_number, initial_deposit=0):
+        account = BankAccount(account_number, initial_deposit)
+        customer = Customer(name, account)
+        self.customers.append(customer)
+        print(f"Mijoz {name} uchun hisob raqami ochildi: {account_number}.")
+        return account
 
-        // Setting property values
-        myBook.Author = "John Doe";
-        myBook.Price = 29.99m;
+    def close_account(self, account_number):
+        for customer in self.customers:
+            if customer.account.account_number == account_number:
+                self.customers.remove(customer)
+                print(f"Hisob raqami yopildi: {account_number}.")
+                return
+        print("Hisob raqami topilmadi.")
 
-        // Displaying book details
-        myBook.DisplayDetails();
+    def transfer(self, from_account_number, to_account_number, amount):
+        from_account = None
+        to_account = None
 
-        // Applying a discount
-        myBook.ApplyDiscount(10);
+        for customer in self.customers:
+            if customer.account.account_number == from_account_number:
+                from_account = customer.account
+            if customer.account.account_number == to_account_number:
+                to_account = customer.account
 
-        // Displaying updated details
-        myBook.DisplayDetails();
-    }
-}
+        if from_account and to_account:
+            if from_account.balance >= amount:
+                from_account.withdraw(amount)
+                to_account.deposit(amount)
+                print(f"{amount} so'm {from_account_number} dan {to_account_number} ga o'tkazildi.")
+            else:
+                print("Pul o'tkazish uchun yetarli mablag' mavjud emas.")
+        else:
+            print("Hisob raqami topilmadi.")
+
+
+class BankApp:
+    def run(self):
+        bank = Bank()
+
+        # Mijozlar va hisoblar yaratish
+        account1 = bank.open_account("Ali", "12345", 1000)
+        account2 = bank.open_account("Vali", "67890", 500)
+
+        # Hisoblar o'rtasida pul o'tkazish
+        bank.transfer("12345", "67890", 300)
+
+        # Balansni ko'rsatish
+        print(f"Ali balans: {account1.get_balance()} so'm")
+        print(f"Vali balans: {account2.get_balance()} so'm")
+
+        # Hisob yopish
+        bank.close_account("12345")
+
+# Dastur ishga tushiriladi
+if __name__ == "__main__":
+    app = BankApp()
+    app.run()
 
