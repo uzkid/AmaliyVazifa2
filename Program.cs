@@ -1,92 +1,104 @@
-class BankAccount:
-    def __init__(self, account_number, balance=0):
-        self.account_number = account_number
-        self.balance = balance
+using System;
+using System.Collections.Generic;
 
-    def deposit(self, amount):
-        if amount > 0:
-            self.balance += amount
-            print(f"{amount} so'm depozit qilindi. Joriy balans: {self.balance} so'm.")
-        else:
-            print("Depozit miqdori noldan katta bo'lishi kerak.")
+class Account
+{
+    public string AccountNumber { get; private set; }
+    public decimal Balance { get; private set; }
 
-    def withdraw(self, amount):
-        if 0 < amount <= self.balance:
-            self.balance -= amount
-            print(f"{amount} so'm yechildi. Joriy balans: {self.balance} so'm.")
-        else:
-            print("Pul yechib olish uchun yetarli mablag' mavjud emas yoki miqdor noto'g'ri.")
+    public Account(string accountNumber, decimal initialBalance)
+    {
+        AccountNumber = accountNumber;
+        Balance = initialBalance;
+    }
 
-    def get_balance(self):
-        return self.balance
+    public void Deposit(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Summani noto'g'ri kiritdingiz.");
+        Balance += amount;
+    }
 
+    public void Withdraw(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentException("Summani noto'g'ri kiritdingiz.");
+        if (amount > Balance) throw new InvalidOperationException("Balans yetarli emas.");
+        Balance -= amount;
+    }
 
-class Customer:
-    def __init__(self, name, account):
-        self.name = name
-        self.account = account
+    public decimal GetBalance() => Balance;
+}
 
+class Customer
+{
+    public string Name { get; private set; }
+    public Account CustomerAccount { get; private set; }
 
-class Bank:
-    def __init__(self):
-        self.customers = []
+    public Customer(string name, Account account)
+    {
+        Name = name;
+        CustomerAccount = account;
+    }
+}
 
-    def open_account(self, name, account_number, initial_deposit=0):
-        account = BankAccount(account_number, initial_deposit)
-        customer = Customer(name, account)
-        self.customers.append(customer)
-        print(f"Mijoz {name} uchun hisob raqami ochildi: {account_number}.")
-        return account
+class Bank
+{
+    private List<Customer> customers = new List<Customer>();
 
-    def close_account(self, account_number):
-        for customer in self.customers:
-            if customer.account.account_number == account_number:
-                self.customers.remove(customer)
-                print(f"Hisob raqami yopildi: {account_number}.")
-                return
-        print("Hisob raqami topilmadi.")
+    public Customer OpenAccount(string name, string accountNumber, decimal initialBalance)
+    {
+        Account newAccount = new Account(accountNumber, initialBalance);
+        Customer newCustomer = new Customer(name, newAccount);
+        customers.Add(newCustomer);
+        return newCustomer;
+    }
 
-    def transfer(self, from_account_number, to_account_number, amount):
-        from_account = None
-        to_account = None
+    public void CloseAccount(string accountNumber)
+    {
+        Customer customer = customers.Find(c => c.CustomerAccount.AccountNumber == accountNumber);
+        if (customer == null) throw new InvalidOperationException("Hisob topilmadi.");
+        customers.Remove(customer);
+    }
 
-        for customer in self.customers:
-            if customer.account.account_number == from_account_number:
-                from_account = customer.account
-            if customer.account.account_number == to_account_number:
-                to_account = customer.account
+    public void Transfer(string fromAccountNumber, string toAccountNumber, decimal amount)
+    {
+        Account fromAccount = customers.Find(c => c.CustomerAccount.AccountNumber == fromAccountNumber)?.CustomerAccount;
+        Account toAccount = customers.Find(c => c.CustomerAccount.AccountNumber == toAccountNumber)?.CustomerAccount;
 
-        if from_account and to_account:
-            if from_account.balance >= amount:
-                from_account.withdraw(amount)
-                to_account.deposit(amount)
-                print(f"{amount} so'm {from_account_number} dan {to_account_number} ga o'tkazildi.")
-            else:
-                print("Pul o'tkazish uchun yetarli mablag' mavjud emas.")
-        else:
-            print("Hisob raqami topilmadi.")
+        if (fromAccount == null || toAccount == null) throw new InvalidOperationException("Hisob topilmadi.");
 
+        fromAccount.Withdraw(amount);
+        toAccount.Deposit(amount);
+    }
 
-class BankApp:
-    def run(self):
-        bank = Bank()
+    public void DisplayBalances()
+    {
+        foreach (var customer in customers)
+        {
+            Console.WriteLine($"{customer.Name} hisob raqami: {customer.CustomerAccount.AccountNumber}, Balans: {customer.CustomerAccount.GetBalance()} so'm.");
+        }
+    }
+}
 
-        # Mijozlar va hisoblar yaratish
-        account1 = bank.open_account("Ali", "12345", 1000)
-        account2 = bank.open_account("Vali", "67890", 500)
+class BankApp
+{
+    static void Main(string[] args)
+    {
+        Bank bank = new Bank();
 
-        # Hisoblar o'rtasida pul o'tkazish
-        bank.transfer("12345", "67890", 300)
+        var customer1 = bank.OpenAccount("Ali", "12345", 100000);
+        var customer2 = bank.OpenAccount("Vali", "67890", 200000);
 
-        # Balansni ko'rsatish
-        print(f"Ali balans: {account1.get_balance()} so'm")
-        print(f"Vali balans: {account2.get_balance()} so'm")
+        Console.WriteLine("Boshlang'ich balanslar:");
+        bank.DisplayBalances();
 
-        # Hisob yopish
-        bank.close_account("12345")
+        bank.Transfer("12345", "67890", 50000);
 
-# Dastur ishga tushiriladi
-if __name__ == "__main__":
-    app = BankApp()
-    app.run()
+        Console.WriteLine("\nTranzaktsiyadan keyingi balanslar:");
+        bank.DisplayBalances();
+
+        bank.CloseAccount("12345");
+        Console.WriteLine("\nAli hisobini yopgandan keyingi balanslar:");
+        bank.DisplayBalances();
+    }
+}
 
